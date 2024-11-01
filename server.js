@@ -1,28 +1,27 @@
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
-const path = require('path'); // Import the path module
+const path = require('path'); 
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
+
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from the public directory (optional)
-app.use(express.static('public')); // You can place your HTML and CSS in a 'public' folder if you want
 
-// Your Google Sheet ID and API Key
-const SHEET_ID = '119pazdyPllZwwWquhKjS-L9GLEG3P325-m5YIYh2qrI';
-const API_KEY = 'AIzaSyDw7_jg0PT8Z4tnyvY0Vm-BWxoXK9sjhW4';
+app.use(express.static('public'));
 
-// Root route
+
+const SHEET_ID = process.env.SHEET_ID; // Set in Render
+const API_KEY = process.env.API_KEY; // Set in Render
+
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html')); // Serve index.html
+    res.sendFile(path.join(__dirname, 'index.html')); 
 });
 
-// Endpoint to get advice based on selected mood
+
 app.get('/api/advice', async (req, res) => {
     const moodName = req.query.mood;
     if (!moodName) {
@@ -31,15 +30,15 @@ app.get('/api/advice', async (req, res) => {
 
     try {
         const response = await axios.get(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1?key=${API_KEY}`);
-        const moods = response.data.values.slice(1); // Skip header row
+        const moods = response.data.values.slice(1); 
 
-        // Find the mood and corresponding advice
+        
         const moodEntry = moods.find(row => row[0].toLowerCase() === moodName.toLowerCase());
         if (moodEntry) {
             const advice = {
-                mood: moodEntry[0], // Mood Name
-                advice: moodEntry[1], // Mismatched Advice
-                alternateAdvice: moodEntry[2] // Annoying Alternate Advice
+                mood: moodEntry[0], 
+                advice: moodEntry[1], 
+                alternateAdvice: moodEntry[2] 
             };
             res.json(advice);
         } else {
@@ -51,7 +50,7 @@ app.get('/api/advice', async (req, res) => {
     }
 });
 
-// Start the server
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
