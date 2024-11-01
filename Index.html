@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood Mismatcher</title>
+    <script>
+        async function fetchAdvice() {
+            const mood = document.getElementById('moodSelect').value;
+            const response = await fetch(`http://localhost:3000/api/advice?mood=${mood}`);
+            if (response.ok) {
+                const advice = await response.json();
+                document.getElementById('output').innerHTML = `<h2>Mood: ${advice.mood}</h2><p>Advice: ${advice.advice}</p>`;
+            } else {
+                document.getElementById('output').innerHTML = `<p>Error: Mood not found.</p>`;
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Mood Mismatcher</h1>
+    <label for="moodSelect">Select your mood:</label>
+    <select id="moodSelect">
+        <option value="Happy">Happy</option>
+        <option value="Sad">Sad</option>
+        <option value="Motivated">Motivated</option>
+        <option value="Stressed">Stressed</option>
+        <option value="Bored">Bored</option>
+        <option value="Confused">Confused</option>
+		<option value="Excited">Excited</option>
+		<option value="Tired">Tired</option>
+		<option value="Anxious">Anxious</option>
+		<option value="Content">Content</option>
+		<option value="Weird">Weird</option>
+		
+    </select>
+    <button onclick="fetchAdvice()">Get Mismatched Advice</button>
+    <div id="output"></div>
+</body>
+</html>
