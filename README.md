@@ -23,10 +23,9 @@ Mood Mismatcher is a web application designed to provide users with the worst ad
 - A Google Sheets API key and Sheet ID
 
 ## Link
-- https://mood-mismatcher.onrender.com/
+- [Live Demo](https://mood-mismatcher.onrender.com/)
 
-### Clone the Repository
+## Clone the Repository
 ```bash
-git clone https://github.com/yourusername/mood-mismatcher.git
+git clone https://github.com/Rezinch/mood-mismatcher.git
 cd mood-mismatcher
-
