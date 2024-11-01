@@ -4,37 +4,243 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mood Mismatcher</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #000;
+            color: #fff;
+            overflow: hidden;
+            text-align: center;
+            position: relative;
+        }
+        h1 {
+            color: #fff;
+            text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            justify-content: center;
+        }
+        .mood-button {
+            background-color: #1e1e1e;
+            color: #fff;
+            width: 100px; 
+            height: 80px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1);
+            font-size: 1em;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+        .mood-button.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .mood-button:hover {
+            background-color: #333;
+            transform: scale(1.05);
+        }
+        .mood-button:active {
+            background-color: #555;
+            transform: scale(0.95);
+        }
+        #output {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: rgba(30, 30, 30, 0.9);
+            border-radius: 8px;
+            color: #fff;
+            transition: opacity 0.3s;
+            opacity: 0;
+            box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+        #output.show {
+            opacity: 1;
+        }
+        #choose-button {
+            background-color: #4A90E2;
+            color: #fff;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        #choose-button:hover {
+            background-color: #357ABD;
+        }
+        .emoji {
+            position: absolute;
+            top: -50px;
+            font-size: 2rem;
+            opacity: 0.8;
+            animation: fall linear infinite;
+        }
+        @keyframes fall {
+            0% {
+                transform: translateY(-120px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        #gifContainer {
+            display: none;
+            margin-top: 20px;
+            padding: 10px;
+        }
+        #rainToggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #4A90E2;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1);
+        }
+        #rainToggle:hover {
+            background-color: #357ABD;
+        }
+    </style>
     <script>
-        async function fetchAdvice() {
-            const mood = document.getElementById('moodSelect').value;
+        const moods = [
+            { name: 'Fear', img: 'https://imgur.com/sj99IHb.gif', emoji: '😱' },
+            { name: 'Anger', img: 'https://imgur.com/bnWmnLL.gif', emoji: '😡' },
+            { name: 'Sad', img: 'https://imgur.com/0uWgl9T.gif', emoji: '😢' },
+            { name: 'Disgust', img: 'https://imgur.com/NN5mndX.gif', emoji: '🤢' },
+            { name: 'Joy', img: 'https://imgur.com/Vtu8Q31.gif', emoji: '😊' },
+            { name: 'Anxious', img: 'https://imgur.com/JIVCL9P.gif', emoji: '😰' },
+            { name: 'Embarrassed', img: 'https://imgur.com/ipB1oWs.gif', emoji: '😳' },
+            { name: 'Bored', img: 'https://imgur.com/Eu9YE95.gif', emoji: '🥱' }
+        ];
+
+        let isRainEnabled = true;
+        let moodPressCount = {}; // To track the number of times a mood is pressed
+
+        function createButtons() {
+            const buttonContainer = document.querySelector('.button-container');
+            moods.forEach(mood => {
+                const button = document.createElement('button');
+                button.className = 'mood-button';
+                button.innerText = mood.name;
+                button.onclick = () => fetchAdvice(mood.name);
+
+                buttonContainer.appendChild(button);
+            });
+            showButtons(buttonContainer);
+        }
+
+        function showButtons(container) {
+            container.style.opacity = 1;
+            container.querySelectorAll('.mood-button').forEach((button, index) => {
+                setTimeout(() => button.classList.add('show'), index * 100);
+            });
+        }
+
+        async function fetchAdvice(mood) {
+            const gifContainer = document.getElementById('gifContainer');
+            gifContainer.innerHTML = `<img src="${moods.find(m => m.name === mood).img}" alt="${mood} GIF" />`;
+            gifContainer.style.display = 'block';
+
+            if (!moodPressCount[mood]) {
+                moodPressCount[mood] = 0;
+            }
+            moodPressCount[mood]++;
+
+            const outputDiv = document.getElementById('output');
+
             const response = await fetch(`http://localhost:3000/api/advice?mood=${mood}`);
             if (response.ok) {
                 const advice = await response.json();
-                document.getElementById('output').innerHTML = `<h2>Mood: ${advice.mood}</h2><p>Advice: ${advice.advice}</p>`;
+                const displayAdvice = moodPressCount[mood] === 1 ? advice.advice : advice.alternateAdvice;
+                
+                outputDiv.innerHTML = `
+                    <h2>Mood: ${mood}</h2>
+                    <p><strong>Advice:</strong> ${displayAdvice}</p>
+                `;
+                if (moodPressCount[mood] > 1) {
+                    moodPressCount[mood] = 0;
+                }
             } else {
-                document.getElementById('output').innerHTML = `<p>Error: Mood not found.</p>`;
+                outputDiv.innerHTML = `<p>Error: Mood not found.</p>`;
+            }
+
+            outputDiv.classList.add('show');
+
+            if (isRainEnabled) {
+                startEmojiRain(mood);
             }
         }
+
+        function startEmojiRain(mood) {
+            stopEmojiRain();
+            const emoji = moods.find(m => m.name === mood).emoji;
+            for (let i = 0; i < 30; i++) {
+                const emojiElement = document.createElement('div');
+                emojiElement.className = 'emoji';
+                emojiElement.innerText = emoji;
+                emojiElement.style.left = `${Math.random() * 100}vw`;
+                emojiElement.style.animationDuration = `${Math.random() * 2 + 3}s`;
+                emojiElement.style.fontSize = `${Math.random() * 1.5 + 1}rem`;
+                document.body.appendChild(emojiElement);
+
+                emojiElement.addEventListener('animationend', () => {
+                    emojiElement.remove();
+                });
+            }
+        }
+
+        function stopEmojiRain() {
+            document.querySelectorAll('.emoji').forEach(emoji => emoji.remove());
+        }
+
+        function toggleRain() {
+            isRainEnabled = !isRainEnabled;
+            document.getElementById('rainToggle').innerText = isRainEnabled ? 'Rain: On' : 'Rain: Off';
+            if (!isRainEnabled) stopEmojiRain();
+        }
+
+        window.onload = () => {
+            document.getElementById('choose-button').onclick = createButtons;
+            document.getElementById('rainToggle').onclick = toggleRain;
+        };
     </script>
 </head>
 <body>
+    <div id="gifContainer"></div>
     <h1>Mood Mismatcher</h1>
-    <label for="moodSelect">Select your mood:</label>
-    <select id="moodSelect">
-        <option value="Happy">Happy</option>
-        <option value="Sad">Sad</option>
-        <option value="Motivated">Motivated</option>
-        <option value="Stressed">Stressed</option>
-        <option value="Bored">Bored</option>
-        <option value="Confused">Confused</option>
-		<option value="Excited">Excited</option>
-		<option value="Tired">Tired</option>
-		<option value="Anxious">Anxious</option>
-		<option value="Content">Content</option>
-		<option value="Weird">Weird</option>
-		
-    </select>
-    <button onclick="fetchAdvice()">Get Mismatched Advice</button>
+    <button id="choose-button">Choose Options</button>
+    <div class="button-container"></div>
     <div id="output"></div>
+    <button id="rainToggle">Rain: On</button>
 </body>
 </html>
