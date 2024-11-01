@@ -68,7 +68,7 @@ node server.js
 ## Team Contributions
 - Rezin C H: Project lead, main developer, and API integration.
 - Aleesha K Dinu: UI design and front-end development.
-- Lekshmi Biju: Testing, documentation, and user feedback integration.
+- Lekshmi Biju: Testing and documentation.
 
 ---
 Made with ❤️ at TinkerHub Useless Projects 
