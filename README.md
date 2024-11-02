@@ -61,9 +61,9 @@ node server.js
 *This is what is shown when you press the "Joy" button; you can see the emoji rain and the GIF.*
 
 # Diagrams
-![Workflow](https://imgur.com/ZI83Yoj.png)
+![Workflow](https://imgur.com/ygC8mID.png)
 
-*This workflow diagram illustrates the interaction between users and the app, detailing how mood selection leads to fetching and displaying advice.*
+*This workflow diagram illustrates each step of creating the project.*
 
 ## Team Contributions
 - Rezin C H: Project lead, main developer, and API integration.
